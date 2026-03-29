@@ -13,6 +13,14 @@ export interface EducationEntry {
   year: string;
 }
 
+export interface ProjectEntry {
+  id: string;
+  title: string;
+  subtitle: string;
+  dateStr: string;
+  description: string;
+}
+
 export interface ProfileData {
   fullName: string;
   email: string;
@@ -21,7 +29,7 @@ export interface ProfileData {
   github: string;
   summary: string;
   workExperience: ExperienceEntry[];
-  projects: string;
+  projects: ProjectEntry[];
   education: EducationEntry[];
   skills: string[];
   achievements: string;

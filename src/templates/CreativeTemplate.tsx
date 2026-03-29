@@ -5,7 +5,7 @@ export default function CreativeTemplate({ data }: { data: ProfileData | null })
   if (!data) return null;
   
   return (
-    <div className="w-[794px] min-h-[1123px] bg-white text-slate-800 font-sans mx-auto text-[13px] leading-relaxed shadow-sm relative overflow-hidden">
+    <div className="w-[794px] h-[1123px] bg-white text-slate-800 font-sans mx-auto text-[13px] leading-relaxed shadow-sm relative overflow-hidden">
       
       {/* Top Banner accent */}
       <div className="absolute top-0 left-0 w-full h-4 bg-purple-600" />

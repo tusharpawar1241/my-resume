@@ -23,7 +23,22 @@ export const STATIC_PLACEHOLDER_DATA: ProfileData = {
       description: "- Delivered modular TypeScript architectures for SaaS enterprise clients.\n- Integrated Python-based data pipelines to optimize reporting microservices.\n- Authored automated test suites reducing production bug frequency by 25%."
     }
   ],
-  projects: "- **CloudScale**: A Go-powered infrastructure-as-code automation platform.\n- **ReactiveFlow**: State management library for large-scale TypeScript applications.",
+  projects: [
+    {
+      id: "p1",
+      title: "CloudScale",
+      subtitle: "Golang, Kubernetes",
+      dateStr: "2022",
+      description: "- A Go-powered infrastructure-as-code automation platform.\n- Reduced deployment times by 30% across 50+ microservices."
+    },
+    {
+      id: "p2",
+      title: "ReactiveFlow",
+      subtitle: "TypeScript, React",
+      dateStr: "2021",
+      description: "- State management library for large-scale TypeScript applications.\n- Adopted by 3 major enterprise teams internally."
+    }
+  ],
   education: [
     {
       id: "edu1",

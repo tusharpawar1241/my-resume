@@ -6,7 +6,7 @@ import Home from './pages/home/Home';
 import ProfileWizard from './pages/profile/ProfileWizard';
 import MyResumes from './pages/saved/MyResumes';
 
-import { useAuth } from './contexts/AuthContext';
+import { useAuth } from './hooks/useAuth';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();

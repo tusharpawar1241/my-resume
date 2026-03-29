@@ -5,7 +5,7 @@ import { STATIC_PLACEHOLDER_DATA } from '../../constants/placeholderData';
 import ClassicTemplate from '../../templates/ClassicTemplate';
 import { TEMPLATE_COMPONENTS } from '../../constants/templateMap';
 import { toggleSavedTemplate, getSavedTemplates } from '../../services/firestoreService';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 
 interface TemplatePreviewModalProps {

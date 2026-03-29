@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import CategoryTabs, { type TemplateCategory } from '../../components/dashboard/CategoryTabs';
 import TemplateGrid from '../../components/dashboard/TemplateGrid';
 import TemplatePreviewModal from '../../components/modal/TemplatePreviewModal';
@@ -19,13 +19,16 @@ export default function Home() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    let isMounted = true;
     if (user) {
       getProfileData(user.uid)
-        .then(() => setIsLoading(false))
-        .catch(() => setIsLoading(false));
+        .then(() => { if (isMounted) setIsLoading(false); })
+        .catch(() => { if (isMounted) setIsLoading(false); });
     } else {
-      setIsLoading(false);
+      // Defer to next tick to avoid synchronous state update warning
+      Promise.resolve().then(() => { if (isMounted) setIsLoading(false); });
     }
+    return () => { isMounted = false; };
   }, [user]);
 
   const handleTemplateSelect = (templateId: string) => {

@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useAuth } from '../../contexts/AuthContext';
+import { useState, useEffect, useCallback } from 'react';
+import { useAuth } from '../../hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, signInWithPhoneNumber, type ConfirmationResult } from 'firebase/auth';
 import { auth, googleProvider, setupRecaptcha } from '../../firebase/config';
@@ -10,18 +10,12 @@ export default function Login() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [phone, setPhone] = useState('');
+  const [countryCode, setCountryCode] = useState('+91');
+  const [phoneNumber, setPhoneNumber] = useState('');
   const [otp, setOtp] = useState('');
   const [confirmationResult, setConfirmationResult] = useState<ConfirmationResult | null>(null);
 
-  // Auto-redirect if somehow already logged in and context registers it
-  useEffect(() => {
-    if (user) {
-      handleUserRouting(user.uid, user.email, user.phoneNumber);
-    }
-  }, [user]);
-
-  const handleUserRouting = async (uid: string, email: string | null, phoneNumber: string | null) => {
+  const handleUserRouting = useCallback(async (uid: string, email: string | null, phoneNumber: string | null) => {
     try {
       const isNew = await checkIsNewUser(uid);
       if (isNew) {
@@ -35,7 +29,14 @@ export default function Login() {
       console.error(e);
       navigate('/home'); // Fallback
     }
-  };
+  }, [navigate]);
+
+  // Auto-redirect if somehow already logged in and context registers it
+  useEffect(() => {
+    if (user) {
+      handleUserRouting(user.uid, user.email, user.phoneNumber);
+    }
+  }, [user, handleUserRouting]);
 
   const handleGoogleSignIn = async () => {
     try {
@@ -51,15 +52,16 @@ export default function Login() {
   };
 
   const handleSendOTP = async () => {
-    if (!phone) return;
+    if (!phoneNumber) return;
+    const fullPhone = `${countryCode}${phoneNumber}`;
     try {
       setLoading(true);
       const verifier = setupRecaptcha('recaptcha-container');
-      const confirmation = await signInWithPhoneNumber(auth, phone, verifier);
+      const confirmation = await signInWithPhoneNumber(auth, fullPhone, verifier);
       setConfirmationResult(confirmation);
     } catch (error) {
       console.error(error);
-      alert('Failed to send OTP. Ensure phone format is +1234567890.');
+      alert('Failed to send OTP. Ensure phone format is correct.');
     } finally {
       setLoading(false);
     }
@@ -103,16 +105,25 @@ export default function Login() {
         <div className="bg-white p-4 rounded-xl shadow-sm border border-slate-200 space-y-3">
           {!confirmationResult ? (
             <>
-              <input
-                type="tel"
-                placeholder="Phone (e.g. +1...)"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                className="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
-              />
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  placeholder="+91"
+                  value={countryCode}
+                  onChange={(e) => setCountryCode(e.target.value)}
+                  className="w-20 px-3 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500 font-medium text-center"
+                />
+                <input
+                  type="tel"
+                  placeholder="Phone number"
+                  value={phoneNumber}
+                  onChange={(e) => setPhoneNumber(e.target.value)}
+                  className="flex-1 px-4 py-3 bg-slate-50 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
               <button
                 onClick={handleSendOTP}
-                disabled={loading || !phone}
+                disabled={loading || !phoneNumber}
                 className="w-full bg-brand-600 text-white py-3 px-4 rounded-lg shadow-sm hover:bg-brand-700 transition-colors font-medium disabled:opacity-50"
               >
                 Send OTP

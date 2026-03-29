@@ -5,7 +5,7 @@ export default function ModernTemplate({ data }: { data: ProfileData | null }) {
   if (!data) return null;
   
   return (
-    <div className="w-[794px] min-h-[1123px] flex font-sans mx-auto text-[13px] leading-relaxed shadow-sm bg-white overflow-hidden">
+    <div className="w-[794px] h-[1123px] flex font-sans mx-auto text-[13px] leading-relaxed shadow-sm bg-white overflow-hidden relative">
       {/* Left Sidebar */}
       <div className="w-[33%] bg-slate-50 p-8 text-slate-800 flex flex-col gap-8 border-r border-slate-100">
         <div>

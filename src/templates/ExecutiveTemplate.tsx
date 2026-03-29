@@ -4,7 +4,7 @@ export default function ExecutiveTemplate({ data }: { data: ProfileData | null }
   if (!data) return null;
   
   return (
-    <div className="w-[794px] min-h-[1123px] bg-white p-14 text-slate-900 font-serif mx-auto text-[13px] leading-relaxed shadow-sm">
+    <div className="w-[794px] h-[1123px] bg-white p-14 text-slate-900 font-serif mx-auto text-[13px] leading-relaxed shadow-sm overflow-hidden relative">
       
       {/* Centered Executive Header */}
       <header className="text-center mb-8">

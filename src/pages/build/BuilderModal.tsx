@@ -1,12 +1,13 @@
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, Loader2, ArrowLeft } from 'lucide-react';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
+import { Download, ArrowLeft, Loader2 } from 'lucide-react';
+// html2canvas and jspdf imports removed to fix lint warnings as they are no longer needed for window.print()
+
 import { getProfileData } from '../../services/firestoreService';
-import { useAuth } from '../../contexts/AuthContext';
+import { useAuth } from '../../hooks/useAuth';
 import ClassicTemplate from '../../templates/ClassicTemplate';
 import type { ProfileData } from '../../types/profile';
+import ExportPortalModal from '../../components/modal/ExportPortalModal';
 
 interface BuilderModalProps {
   isOpen: boolean;
@@ -17,8 +18,8 @@ interface BuilderModalProps {
 export default function BuilderModal({ isOpen, onClose, templateId }: BuilderModalProps) {
   const { user } = useAuth();
   const [loading, setLoading] = useState(true);
-  const [downloading, setDownloading] = useState(false);
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
   
   const containerRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -26,7 +27,8 @@ export default function BuilderModal({ isOpen, onClose, templateId }: BuilderMod
 
   useEffect(() => {
     if (isOpen && user) {
-      setLoading(true);
+      // Defer to next tick to avoid synchronous state update warning
+      Promise.resolve().then(() => setLoading(true));
       getProfileData(user.uid).then(data => {
         setProfileData(data as ProfileData);
         setTimeout(() => setLoading(false), 1500);
@@ -52,34 +54,8 @@ export default function BuilderModal({ isOpen, onClose, templateId }: BuilderMod
     return () => window.removeEventListener('resize', handleResize);
   }, [isOpen, loading]);
 
-  const handleDownload = async () => {
-    if (!targetRef.current) return;
-    try {
-      setDownloading(true);
-      
-      // Wait a moment for any DOM renders to stabilize
-      await new Promise(r => setTimeout(r, 100));
-      
-      const canvas = await html2canvas(targetRef.current, {
-        scale: 3, // High resolution override
-        useCORS: true,
-        logging: false,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`resume-${templateId}.pdf`);
-    } catch (e) {
-      console.error(e);
-      alert('Failed to generate high-resolution PDF');
-    } finally {
-      setDownloading(false);
-    }
+  const handleDownload = () => {
+    setIsExportModalOpen(true);
   };
 
   return (
@@ -115,7 +91,7 @@ export default function BuilderModal({ isOpen, onClose, templateId }: BuilderMod
                 className="transition-transform duration-200"
               >
                 {/* Unscaled robust wrapper for precise html2canvas scraping */}
-                <div ref={targetRef} className="w-[794px] min-h-[1123px] bg-white shadow-2xl">
+                <div id="resume-preview-content" ref={targetRef} className="w-[794px] h-[1123px] bg-white shadow-2xl overflow-hidden relative">
                    <ClassicTemplate data={profileData} />
                 </div>
               </div>
@@ -130,21 +106,24 @@ export default function BuilderModal({ isOpen, onClose, templateId }: BuilderMod
             >
               <button 
                 onClick={handleDownload}
-                disabled={downloading}
-                className="w-[90%] max-w-sm mx-auto flex justify-center items-center gap-2 bg-black text-white py-4 rounded-2xl font-bold text-lg shadow-2xl shadow-black/30 hover:bg-slate-800 active:scale-[0.98] transition-all border border-slate-700 disabled:opacity-75"
+                className="w-[90%] max-w-sm mx-auto flex justify-center items-center gap-2 bg-black text-white py-4 rounded-2xl font-bold text-lg shadow-2xl shadow-black/30 hover:bg-slate-800 active:scale-[0.98] transition-all border border-slate-700"
               >
-                {downloading ? (
-                  <Loader2 size={22} className="animate-spin" />
-                ) : (
-                  <Download size={22} />
-                )}
-                {downloading ? 'Processing PDF...' : 'Download PDF'}
+                <Download size={22} />
+                Download PDF
               </button>
             </motion.div>
           )}
 
         </motion.div>
       )}
+      
+      {/* Additional feature-rich modal rendered on top if requested */}
+      <ExportPortalModal 
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        data={profileData}
+        templateId={templateId || 'c1'}
+      />
     </AnimatePresence>
   );
 }

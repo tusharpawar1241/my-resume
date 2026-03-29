@@ -5,7 +5,7 @@ export default function ClassicTemplate({ data }: { data: ProfileData | null }) 
   if (!data) return null;
   
   return (
-    <div className="w-[794px] min-h-[1123px] bg-white p-12 text-slate-900 font-sans mx-auto text-[13px] leading-relaxed shadow-sm">
+    <div className="w-[794px] h-[1123px] bg-white p-12 text-slate-900 font-sans mx-auto text-[13px] leading-relaxed shadow-sm overflow-hidden relative">
       {/* Name and Contact */}
       <div className="border-b-2 border-slate-900 pb-4 mb-6">
         <h1 className="text-3xl font-bold uppercase tracking-widest mb-2 text-slate-900">{data?.fullName || 'YOUR NAME'}</h1>
@@ -45,10 +45,21 @@ export default function ClassicTemplate({ data }: { data: ProfileData | null }) 
       )}
 
       {/* Projects */}
-      {data?.projects && (
+      {data?.projects && data.projects.length > 0 && (
         <div className="mb-6">
           <h2 className="text-base font-bold uppercase tracking-widest border-b border-slate-300 pb-1 mb-3 text-slate-900">Projects</h2>
-          <div className="whitespace-pre-wrap">{data.projects}</div>
+          <div className="space-y-4">
+            {data.projects.map(proj => (
+              <div key={proj.id}>
+                <div className="flex justify-between items-baseline mb-1">
+                  <h3 className="font-bold text-[14px]">{proj.title}</h3>
+                  <span className="text-slate-600 font-medium">{proj.dateStr}</span>
+                </div>
+                <div className="text-slate-700 italic mb-2">{proj.subtitle}</div>
+                <div className="whitespace-pre-wrap pl-4 border-l-2 border-slate-200 text-slate-700">{proj.description}</div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

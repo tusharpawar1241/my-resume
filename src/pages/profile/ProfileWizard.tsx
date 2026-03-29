@@ -3,9 +3,8 @@ import { useForm, FormProvider } from 'react-hook-form';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ChevronLeft, ChevronRight, Check, Loader2, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
-import html2canvas from 'html2canvas';
-import { jsPDF } from 'jspdf';
-import { useAuth } from '../../contexts/AuthContext';
+
+import { useAuth } from '../../hooks/useAuth';
 import { saveProfileData, getProfileData } from '../../services/firestoreService';
 import type { ProfileData } from '../../types/profile';
 import { StepPersonal } from './steps/StepPersonal';
@@ -14,6 +13,7 @@ import { StepEducation } from './steps/StepEducation';
 import ClassicTemplate from '../../templates/ClassicTemplate';
 import { TEMPLATE_COMPONENTS } from '../../constants/templateMap';
 import { STATIC_PLACEHOLDER_DATA } from '../../constants/placeholderData';
+import ExportPortalModal from '../../components/modal/ExportPortalModal';
 
 interface ProfileWizardProps {
   templateId?: string;
@@ -29,8 +29,8 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
   const [step, setStep] = useState(1);
   const [direction, setDirection] = useState(0);
   const [loading, setLoading] = useState(false);
-  const [downloading, setDownloading] = useState(false);
   const [initialFetchDone, setInitialFetchDone] = useState(false);
+  const [isExportModalOpen, setIsExportModalOpen] = useState(false);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const targetRef = useRef<HTMLDivElement>(null);
@@ -40,7 +40,7 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
     mode: 'onChange',
     defaultValues: {
       fullName: '', email: '', phone: '', linkedin: '', github: '',
-      summary: '', workExperience: [], projects: '', education: [], skills: [], achievements: ''
+      summary: '', workExperience: [], projects: [], education: [], skills: [], achievements: ''
     }
   });
 
@@ -57,11 +57,7 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
         }
         const data = await getProfileData(user.uid);
         if (data) {
-          const safeData = { ...data };
-          if (!Array.isArray(safeData.workExperience)) safeData.workExperience = [];
-          if (!Array.isArray(safeData.education)) safeData.education = [];
-          if (!Array.isArray(safeData.skills)) safeData.skills = [];
-          methods.reset(safeData);
+          methods.reset(data);
         } else {
           // Initialize with current user info if no doc exists
           methods.reset((prev) => ({
@@ -148,38 +144,8 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
     }
   };
 
-  const handleDownload = async () => {
-    const targetElement = document.getElementById('resume-to-print');
-    if (!targetElement) {
-      console.error('Target element not found');
-      return;
-    }
-    
-    try {
-      setDownloading(true);
-      await new Promise(r => setTimeout(r, 100)); // Layout stability flush
-      
-      const canvas = await html2canvas(targetElement, {
-        scale: 2,
-        useCORS: true, 
-        logging: true,
-        windowWidth: 1200,
-        backgroundColor: '#ffffff'
-      });
-      
-      const imgData = canvas.toDataURL('image/png');
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-      
-      pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-      pdf.save(`resume-export.pdf`);
-    } catch (e) {
-      console.error('PDF Generation Error:', e);
-      alert('Failed to generate high-resolution PDF. Please check the console log for details.');
-    } finally {
-      setDownloading(false);
-    }
+  const handleDownload = () => {
+    setIsExportModalOpen(true);
   };
 
   if (!initialFetchDone) {
@@ -287,11 +253,10 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
               </div>
               <button 
                 onClick={handleDownload}
-                disabled={downloading}
-                className="flex items-center gap-2 text-sm font-semibold bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 disabled:opacity-50 shadow-sm transition-colors"
+                className="flex items-center gap-2 text-sm font-semibold bg-slate-900 text-white px-4 py-2 rounded-lg hover:bg-slate-800 shadow-sm transition-colors"
               >
-                {downloading ? <Loader2 size={16} className="animate-spin" /> : <Download size={16} />}
-                {downloading ? 'Processing...' : 'Export PDF'}
+                <Download size={16} />
+                Export PDF
               </button>
             </div>
             
@@ -302,15 +267,15 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
                 className="transition-transform duration-100"
               >
                 {/* 1:1 Rendering Engine Canvas */}
-                <div id="resume-to-print" ref={targetRef} className="w-[794px] min-h-[1123px] bg-white shadow-xl ring-1 ring-slate-900/5">
+                <div id="resume-preview-content" ref={targetRef} className="w-[794px] min-h-[1123px] bg-white shadow-xl ring-1 ring-slate-900/5">
                    <TemplateComponent data={{
                      ...STATIC_PLACEHOLDER_DATA,
-                     ...Object.fromEntries(
-                       Object.entries(watchData).filter(([_, v]) => 
-                         v !== null && v !== undefined && v !== '' && 
-                         (!Array.isArray(v) || v.length > 0)
-                       )
-                     )
+                      ...Object.fromEntries(
+                        Object.entries(watchData).filter(([key, v]) => 
+                          key !== null && v !== null && v !== undefined && v !== '' && 
+                          (!Array.isArray(v) || v.length > 0)
+                        )
+                      )
                    }} />
                 </div>
               </div>
@@ -319,6 +284,13 @@ export default function ProfileWizard({ templateId: propTemplateId, onCancel }: 
           
         </div>
       </FormProvider>
+
+      <ExportPortalModal 
+        isOpen={isExportModalOpen}
+        onClose={() => setIsExportModalOpen(false)}
+        data={watchData}
+        templateId={templateId}
+      />
     </div>
   );
 }
