@@ -59,22 +59,24 @@ export default function Home() {
   return (
     <div className="flex flex-col h-full bg-slate-50">
       {/* Sticky Top Header */}
-      <div className="sticky top-0 z-20 bg-slate-50/85 backdrop-blur-md px-6 pt-6 pb-2">
-        <div className="flex justify-between items-center mb-6">
+      <div className="sticky top-0 z-20 bg-slate-50/90 backdrop-blur-md px-4 sm:px-6 pt-4 sm:pt-6 pb-2 border-b border-slate-200/60">
+        <div className="flex justify-between items-center mb-3 sm:mb-5">
           <div>
-            <p className="text-sm font-medium text-slate-500">Welcome back,</p>
-            <h1 className="text-2xl font-bold text-slate-900">{user?.displayName || user?.email?.split('@')[0] || 'Guest'}</h1>
+            <p className="text-[10px] sm:text-xs font-bold text-slate-400 uppercase tracking-widest">Dashboard</p>
+            <h1 className="text-lg sm:text-2xl font-black text-slate-900 leading-tight truncate max-w-[200px] sm:max-w-none">
+              {user?.displayName || user?.email?.split('@')[0] || 'User'}
+            </h1>
           </div>
-          <button className="p-2 bg-white rounded-full shadow-sm border border-slate-200 text-slate-600 hover:bg-slate-50 transition-colors">
-            <Search size={20} />
+          <button className="p-2 sm:p-2.5 bg-white rounded-xl shadow-sm border border-slate-200 text-slate-600 hover:bg-slate-50 transition-all active:scale-90 shrink-0">
+            <Search size={18} />
           </button>
         </div>
         
         <CategoryTabs activeTab={activeCategory} onTabChange={setActiveCategory} />
       </div>
 
-      {/* Scrollable Content */}
-      <div className="px-6 flex-1 overflow-y-auto pb-4">
+      {/* Scrollable Content — pb-24 clears iOS/Android system nav bars */}
+      <div className="px-3 sm:px-6 flex-1 overflow-y-auto pb-24 pt-4">
         <TemplateGrid category={activeCategory} onSelect={handleTemplateSelect} />
       </div>
 

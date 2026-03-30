@@ -69,9 +69,9 @@ export default function Sidebar() {
 
   return (
     <>
-      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white border-b border-slate-200 z-40 flex items-center px-4 justify-between shadow-sm">
-        <h1 className="text-xl font-bold text-brand-700">ATC Resume</h1>
-        <button onClick={() => setIsOpen(true)} className="p-2 text-slate-600 bg-slate-100 rounded-lg hover:bg-slate-200 transition-colors">
+      <div className="lg:hidden fixed top-0 left-0 right-0 h-16 bg-white/95 backdrop-blur-md border-b border-slate-200 z-[100] flex items-center px-6 justify-between shadow-sm">
+        <h1 className="text-xl font-bold text-brand-700 tracking-tight">ATC Resume</h1>
+        <button onClick={() => setIsOpen(true)} className="p-2.5 text-slate-600 bg-slate-100 rounded-xl hover:bg-slate-200 transition-colors active:scale-95">
           <Menu size={20} />
         </button>
       </div>
@@ -82,20 +82,20 @@ export default function Sidebar() {
 
       <AnimatePresence>
         {isOpen && (
-          <div className="lg:hidden fixed inset-0 z-[60] flex">
+          <div className="lg:hidden fixed inset-0 z-[200] flex">
             <motion.div 
               initial={{ opacity: 0 }} 
               animate={{ opacity: 1 }} 
               exit={{ opacity: 0 }} 
-              className="absolute inset-0 bg-black/40 backdrop-blur-sm" 
+              className="absolute inset-0 bg-black/50 backdrop-blur-sm" 
               onClick={() => setIsOpen(false)} 
             />
             <motion.div 
               initial={{ x: '-100%' }} 
               animate={{ x: 0 }} 
               exit={{ x: '-100%' }} 
-              transition={{ type: 'spring', bounce: 0, duration: 0.4 }} 
-              className="relative w-64 h-full bg-white shadow-2xl z-10"
+              transition={{ type: 'spring', bounce: 0, duration: 0.35 }} 
+              className="relative w-[280px] max-w-[85vw] h-full bg-white shadow-2xl z-10"
             >
               {sidebarContent}
             </motion.div>

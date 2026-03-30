@@ -1,5 +1,55 @@
 @import "tailwindcss";
 
+:root {
+  --preview-scale: 0.48; /* Default desktop scale in modal */
+}
+
+@media (max-width: 800px) {
+  :root {
+    --preview-scale: 0.65;
+  }
+}
+
+@media (max-width: 600px) {
+  :root {
+    --preview-scale: 0.48;
+  }
+}
+
+@media (max-width: 400px) {
+  :root {
+    --preview-scale: 0.38;
+  }
+}
+
+/* Scaling System for Resume Previews in TemplatePreviewModal */
+.preview-scaler-wrapper {
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  /* Mathematically eliminates the gap by setting height to scaled value */
+  height: calc(1123px * var(--preview-scale));
+  transition: height 0.3s ease-out;
+}
+
+.template-preview-content {
+  width: 794px;
+  height: 1123px;
+  transform: scale(var(--preview-scale));
+  transform-origin: top center;
+  flex-shrink: 0;
+  pointer-events: none;
+  transition: transform 0.3s ease-out;
+}
+
+/* Custom scrollbar — slim and modern */
+.custom-scrollbar::-webkit-scrollbar { width: 4px; height: 4px; }
+.custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+.custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 999px; }
+.custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(0,0,0,0.25); }
+
+
 @theme {
   --color-brand-50: #f5f3ff;
   --color-brand-100: #ede9fe;
